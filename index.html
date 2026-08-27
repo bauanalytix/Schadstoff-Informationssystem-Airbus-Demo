@@ -61,30 +61,14 @@
     justify-self: start;
   }
 
-  .brandbar .vub-logo {
-    height: 48px;
+  .brandbar .airbus-logo {
+    height: 38px;
+    justify-self: center;
+  }
+
+  .brandbar .apleona-logo {
+    height: 60px;
     justify-self: end;
-  }
-
-  .demo-wordmark {
-    min-width: 184px;
-    padding: 10px 18px 9px;
-    border: 1px solid rgba(0, 32, 91, 0.25);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.78);
-    color: var(--navy);
-    text-align: center;
-    letter-spacing: 0.06em;
-    font-weight: 700;
-    line-height: 1.05;
-  }
-
-  .demo-wordmark span {
-    display: block;
-    margin-top: 4px;
-    color: var(--blue);
-    font-size: 0.72rem;
-    letter-spacing: 0.18em;
   }
 
   .hero {
@@ -384,9 +368,10 @@
       grid-template-columns: 1fr 1fr;
     }
 
-    .demo-wordmark {
+    .apleona-logo {
       grid-column: 1 / -1;
       grid-row: 2;
+      justify-self: center !important;
     }
 
     .filter-grid {
@@ -413,9 +398,16 @@
       gap: 12px;
     }
 
-    .brandbar .bauanalytix-logo,
-    .brandbar .vub-logo {
+    .brandbar .bauanalytix-logo {
       height: 36px;
+    }
+
+    .brandbar .airbus-logo {
+      height: 30px;
+    }
+
+    .brandbar .apleona-logo {
+      height: 48px;
     }
 
     .hero,
@@ -439,13 +431,10 @@
 
 <body>
 <main class="container">
-  <div class="brandbar" aria-label="Projektpartner und Referenz">
+  <div class="brandbar" aria-label="Projektpartner">
     <img class="bauanalytix-logo" src="bauanalytix.jpg" alt="bauanalytix">
-    <div class="demo-wordmark" aria-label="Airbus Demonstration">
-      AIRBUS
-      <span>DEMO</span>
-    </div>
-    <img class="vub-logo" src="vub.png" alt="Vermögen und Bau – Referenz für Handlungshinweise">
+    <img class="airbus-logo" src="airbus.svg" alt="Airbus">
+    <img class="apleona-logo" src="apleona.gif" alt="Apleona">
   </div>
 
   <section class="hero">
@@ -475,7 +464,7 @@
             <select id="buildingSelect"></select>
           </div>
           <div>
-            <label for="levelSelect">Niveau</label>
+            <label for="levelSelect">Stockwerk</label>
             <select id="levelSelect"></select>
           </div>
           <div>
@@ -661,8 +650,8 @@ function populateBuildings() {
 function populateLevels() {
   const plant = plantSelect.value;
   const building = buildingSelect.value;
-  const levels = uniqueValues('niveau', item => item.werk === plant && item.gebaeude === building);
-  setSelectOptions(levelSelect, levels, 'Keine Niveaus gefunden', true);
+  const levels = uniqueValues('stockwerk', item => item.werk === plant && item.gebaeude === building);
+  setSelectOptions(levelSelect, levels, 'Keine Stockwerke gefunden', true);
   populateRooms();
 }
 
@@ -673,7 +662,7 @@ function populateRooms() {
   const rooms = uniqueValues('raum', item =>
     item.werk === plant &&
     item.gebaeude === building &&
-    (level === '__ALL__' || item.niveau === level)
+    (level === '__ALL__' || item.stockwerk === level)
   );
   setSelectOptions(roomSelect, rooms, 'Keine Räume gefunden', true);
   populateCategories();
@@ -684,7 +673,7 @@ function selectionMatches(item) {
   const room = roomSelect.value;
   return item.werk === plantSelect.value &&
     item.gebaeude === buildingSelect.value &&
-    (level === '__ALL__' || item.niveau === level) &&
+    (level === '__ALL__' || item.stockwerk === level) &&
     (room === '__ALL__' || item.raum === room || item.raum === 'alle Räume');
 }
 
@@ -793,7 +782,7 @@ function showResults() {
     title.textContent = row.bauteil || row.kategorie || 'ohne Bauteilangabe';
     const meta = document.createElement('span');
     meta.className = 'result-meta';
-    meta.textContent = `${row.werk} · Gebäude ${row.gebaeude} · ${row.niveau} · ${row.raum}`;
+    meta.textContent = `${row.werk} · Gebäude ${row.gebaeude} · ${row.stockwerk} · ${row.raum}`;
 
     const description = document.createElement('div');
     description.className = 'result-description';
@@ -825,7 +814,7 @@ function showResults() {
 
 async function loadExcelFromFile() {
   try {
-    const response = await fetch('airbus_demo.xlsx');
+    const response = await fetch('airbus_demo.xlsx?v=20260827-2', { cache: 'no-store' });
     if (!response.ok) throw new Error('Excel-Datei konnte nicht geladen werden.');
 
     const arrayBuffer = await response.arrayBuffer();
@@ -837,7 +826,7 @@ async function loadExcelFromFile() {
       probe: findValue(row, ['Probe', 'Probennummer', 'Probenummer']),
       werk: findValue(row, ['Werk', 'Standort', 'Werk / Standort']) || 'Werk',
       gebaeude: findValue(row, ['Gebäude', 'Gebaeude']),
-      niveau: findValue(row, ['Niveau', 'Ebene', 'Geschoss', 'Level']),
+      stockwerk: findValue(row, ['Stockwerk', 'Niveau', 'Ebene', 'Geschoss', 'Level']),
       raum: findValue(row, ['Raum', 'Raumnummer', 'Bereich/Raum']),
       kategorie: findValue(row, ['Kategorie', 'Bauteilart', 'Art des Bauteils']),
       bauteil: findValue(row, ['Bauteil']),
@@ -852,7 +841,7 @@ async function loadExcelFromFile() {
       raumbezeichnung: findValue(row, ['Raumbezeichnung']),
       flaeche: findValue(row, ['Fläche', 'Flaeche']),
       handlungshinweise: findValue(row, ['Handlungshinweise', 'Handlungsanweisung', 'Link'])
-    })).filter(row => row.werk && row.gebaeude && row.niveau && row.raum && row.kategorie);
+    })).filter(row => row.werk && row.gebaeude && row.stockwerk && row.raum && row.kategorie);
 
     if (!data.length) throw new Error('Keine verwertbaren Datensätze gefunden.');
 
@@ -923,20 +912,20 @@ async function createPDF() {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
   try {
-    const [bauanalytixLogo, vubLogo] = await Promise.all([
+    const [bauanalytixLogo, airbusLogo, apleonaLogo] = await Promise.all([
       loadImageAsDataURL('bauanalytix.jpg'),
-      loadImageAsDataURL('vub.png')
+      loadImageAsDataURL('airbus.svg'),
+      loadImageAsDataURL('apleona.gif')
     ]);
     doc.addImage(bauanalytixLogo, 'JPEG', 14, 7, 55, 10);
-    doc.addImage(vubLogo, 'JPEG', 232, 7, 48, 12);
+    doc.addImage(airbusLogo, 'JPEG', 119, 7, 59, 11);
+    doc.addImage(apleonaLogo, 'JPEG', 238, 3, 44, 22);
   } catch (error) {
     console.warn('Logos konnten im PDF nicht geladen werden.', error);
   }
 
   doc.setTextColor(0, 32, 91);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.text('AIRBUS DEMO', 123, 13);
   doc.setFontSize(16);
   doc.text('Schadstoff-Informationssystem – Schadstoffübersicht', 14, 29);
 
@@ -954,7 +943,7 @@ async function createPDF() {
   doc.setTextColor(0, 32, 91);
   doc.setFontSize(10.5);
   doc.text(
-    `Werk: ${plantSelect.value} | Gebäude: ${buildingSelect.value} | Niveau: ${levelSelect.value} | Raum: ${roomSelect.value}`,
+    `Werk: ${plantSelect.value} | Gebäude: ${buildingSelect.value} | Stockwerk: ${levelSelect.value} | Raum: ${roomSelect.value}`,
     14,
     49
   );
@@ -962,7 +951,7 @@ async function createPDF() {
 
   const tableData = rows.map(row => [
     row.warnung,
-    row.niveau,
+    row.stockwerk,
     row.raum,
     row.kategorie,
     row.bauteil,
@@ -974,9 +963,11 @@ async function createPDF() {
 
   doc.autoTable({
     startY: 64,
+    margin: { left: 14, right: 14 },
+    tableWidth: 248,
     head: [[
       'Status',
-      'Niveau',
+      'Stockwerk',
       'Raum',
       'Kategorie',
       'Bauteil',
@@ -989,15 +980,15 @@ async function createPDF() {
     styles: { fontSize: 6.8, cellPadding: 1.7, overflow: 'linebreak' },
     headStyles: { fillColor: [0, 32, 91], textColor: 255 },
     columnStyles: {
-      0: { cellWidth: 14 },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 17 },
-      3: { cellWidth: 30 },
-      4: { cellWidth: 33 },
-      5: { cellWidth: 42 },
-      6: { cellWidth: 22 },
+      0: { cellWidth: 13 },
+      1: { cellWidth: 22 },
+      2: { cellWidth: 15 },
+      3: { cellWidth: 29 },
+      4: { cellWidth: 32 },
+      5: { cellWidth: 39 },
+      6: { cellWidth: 20 },
       7: { cellWidth: 48 },
-      8: { cellWidth: 34 }
+      8: { cellWidth: 30 }
     },
     didParseCell(cellData) {
       if (cellData.section !== 'body') return;

@@ -43,6 +43,23 @@
     padding: 24px 0 40px;
   }
 
+  .demo-notice {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border: 1px solid #b8d8f0;
+    border-radius: 0 0 10px 10px;
+    background: #dceefd;
+    color: var(--navy);
+    box-shadow: 0 5px 16px rgba(0, 32, 91, 0.13);
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+  }
+
   .brandbar {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -91,26 +108,6 @@
     margin: 0;
     color: rgba(255, 255, 255, 0.88);
     line-height: 1.5;
-  }
-
-  .demo-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 17px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.13);
-    font-size: 0.84rem;
-    font-weight: 700;
-  }
-
-  .demo-badge::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #73d6ff;
   }
 
   .box {
@@ -431,6 +428,8 @@
 
 <body>
 <main class="container">
+  <div class="demo-notice" role="note">DEMO-VERSION · Sämtliche Raum- und Befunddaten sind fiktiv.</div>
+
   <div class="brandbar" aria-label="Projektpartner">
     <img class="bauanalytix-logo" src="bauanalytix.jpg" alt="bauanalytix">
     <img class="airbus-logo" src="airbus.svg" alt="Airbus">
@@ -440,10 +439,9 @@
   <section class="hero">
     <h1>Digitales Schadstoff-Informationssystem</h1>
     <p>
-      Demonstrationsansicht für einen standortweiten, fachlich begleiteten Zugriff auf
-      dokumentierte Gebäudeschadstoffe, Untersuchungsergebnisse und Handlungshinweise.
+      Standortweiter, fachlich begleiteter Zugriff auf dokumentierte Gebäudeschadstoffe,
+      Untersuchungsergebnisse und Handlungshinweise.
     </p>
-    <div class="demo-badge">Unverbindliche Demonstration mit ausschließlich fiktiven Raum- und Befunddaten</div>
   </section>
 
   <section class="box" aria-label="Auswahl und Filter">
@@ -476,7 +474,7 @@
         <button class="primary-button" type="button" onclick="createPDF()">Auswahl als PDF</button>
         <p class="hint">
           Die Gebäudenummern bilden den bereitgestellten Planstand ab. Räume und Befunde
-          sind bewusst vereinfachte Demonstrationsdaten.
+          sind bewusst vereinfacht dargestellt.
         </p>
       </div>
 
@@ -517,8 +515,7 @@
   <footer class="box footer">
     <strong>© Dr. Daniela Oehmichen, bauanalytix</strong><br>
     Alle Rechte vorbehalten. Die Anwendung einschließlich Struktur, Datenmodell,
-    Programmcode und Inhalte ist urheberrechtlich geschützt. Die angezeigten Befunde
-    sind reine Beispieldaten und stellen keine Aussage zu realen Gebäuden dar.
+    Programmcode und Inhalte ist urheberrechtlich geschützt.
     <br><br>
     <a href="https://www.bauanalytix.de/Impressum/" target="_blank" rel="noopener noreferrer">Impressum</a>
   </footer>
@@ -751,7 +748,7 @@ function showResults() {
   resultsDiv.replaceChildren();
 
   if (!data.length) {
-    resultsDiv.textContent = 'Die Demonstrationsdaten konnten noch nicht geladen werden.';
+    resultsDiv.textContent = 'Die Daten konnten noch nicht geladen werden.';
     return;
   }
 
@@ -814,7 +811,7 @@ function showResults() {
 
 async function loadExcelFromFile() {
   try {
-    const response = await fetch('airbus_demo.xlsx?v=20260827-2', { cache: 'no-store' });
+    const response = await fetch('airbus_demo.xlsx?v=20260828-1', { cache: 'no-store' });
     if (!response.ok) throw new Error('Excel-Datei konnte nicht geladen werden.');
 
     const arrayBuffer = await response.arrayBuffer();
@@ -848,11 +845,11 @@ async function loadExcelFromFile() {
     const plantCount = new Set(data.map(row => row.werk)).size;
     const buildingCount = new Set(data.map(row => `${row.werk}|${row.gebaeude}`)).size;
     statusEl.textContent = `${data.length} Datensätze geladen`;
-    datasetSummaryEl.textContent = `${plantCount} Werke · ${buildingCount} Gebäude · 3 Demo-Räume je Gebäude`;
+    datasetSummaryEl.textContent = `${plantCount} Werke · ${buildingCount} Gebäude · 3 Beispielräume je Gebäude`;
     populatePlants();
   } catch (error) {
     console.error(error);
-    statusEl.textContent = 'Fehler beim Laden der Demonstrationsdaten';
+    statusEl.textContent = 'Fehler beim Laden der Daten';
     resultsDiv.textContent = 'Die Excel-Datenquelle konnte nicht geladen werden.';
   }
 }
@@ -933,7 +930,7 @@ async function createPDF() {
   doc.setTextColor(45, 55, 70);
   doc.setFontSize(8.5);
   doc.text(
-    'Unverbindliche Demonstration mit fiktiven Raum- und Befunddaten. Die Übersicht zeigt die mögliche Struktur eines fachlich begleiteten digitalen Schadstoffkatasters.',
+    'Demo-Version mit fiktiven Raum- und Befunddaten. Die Übersicht zeigt die mögliche Struktur eines fachlich begleiteten digitalen Schadstoffkatasters.',
     14,
     36,
     { maxWidth: 266 }
@@ -1017,7 +1014,7 @@ async function createPDF() {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
-      doc.text('Demonstrationsdaten – keine Aussage zu realen Gebäudebefunden', 14, pageHeight - 7);
+      doc.text('© Dr. Daniela Oehmichen, bauanalytix', 14, pageHeight - 7);
       doc.text(`Seite ${doc.internal.getNumberOfPages()}`, 280, pageHeight - 7, { align: 'right' });
     }
   });
